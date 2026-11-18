@@ -27,6 +27,15 @@ body { margin: 0; background: #fff; color: var(--ink); font: 400 18px/1.5 var(--
 .btc-axis { display: flex; justify-content: space-between; font-size: 14px; color: var(--grey); margin-top: 8px; }
 .btc-note { margin-top: 14px; font-size: 16px; color: var(--grey); min-height: 1.5em; }
 @media (min-width: 900px) { .btc-box { padding: 32px 36px; } }
+.sponsors { padding-top: 0; }
+.sponsors-lead { margin: 16px 0 0; color: var(--grey); }
+.sponsor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 28px; }
+.sponsor { display: flex; align-items: center; justify-content: center; aspect-ratio: 3 / 2; padding: 20px; background: var(--sand); border-radius: 8px; color: var(--grey); font-size: 14px; }
+.sponsor img { display: block; width: 100%; max-width: 160px; height: auto; }
+.sponsor-open { border: 1.5px dashed #c9cbd0; }
+a.sponsor:focus-visible, .sponsor-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.sponsor-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 28px; padding: 0 24px; background: var(--ink); color: #fff; border-radius: 8px; font: 500 16px/1 var(--body); text-decoration: none; }
+@media (min-width: 900px) { .sponsor-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
 </style>
 </head>
 <body>
@@ -40,6 +49,18 @@ body { margin: 0; background: #fff; color: var(--ink); font: 400 18px/1.5 var(--
       </div>
     </div>
     <p class="btc-note" id="btc-note" aria-live="polite"></p>
+  </section>
+
+  <section class="section wrap sponsors" id="sponsors" aria-labelledby="sponsors-h">
+    <h2 id="sponsors-h">Sponsors</h2>
+    <p class="sponsors-lead">Bitcoin is up is made possible by:</p>
+    <div class="sponsor-grid">
+      <a class="sponsor" href="https://moonira.com" rel="noopener"><img src="moonira-logo.svg" alt="Moonira"></a>
+      <div class="sponsor sponsor-open">Your logo</div>
+      <div class="sponsor sponsor-open">Your logo</div>
+      <div class="sponsor sponsor-open">Your logo</div>
+    </div>
+    <a class="sponsor-btn" href="mailto:julius0foerster@gmail.com?subject=Sponsor%20Bitcoin%20is%20up">Become a sponsor</a>
   </section>
 
 <script>
