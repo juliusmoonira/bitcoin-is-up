@@ -1,0 +1,38 @@
+name: Daily OG image
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+concurrency:
+  group: og
+  cancel-in-progress: false
+jobs:
+  og:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts
+      - name: Generate, commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            msg=$(node scripts/generate-og.mjs)
+            git add og.png index.html
+            if git diff --cached --quiet; then echo "No change"; exit 0; fi
+            git commit -m "$msg"
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            git reset --hard origin/main
+          done
+          echo "Push failed 3 times" >&2
+          exit 1
