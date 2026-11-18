@@ -12,6 +12,10 @@ Static one-page site at https://bitcoinisup.com. It shows the live BTC price, th
 
 The workflow commits `og.png` and `index.html` to `main` when they changed, and Vercel redeploys. Link previews refresh on each platform as its cache expires. If both feeds fail, the script exits non-zero and leaves `og.png` untouched.
 
+## Icons
+
+`favicon.svg` is the source. After changing it, run `node scripts/generate-icons.mjs` to rebuild `favicon.ico` and `apple-touch-icon.png`, and commit the outputs.
+
 ## Test locally
 
 ```
