@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bitcoin is up</title>
 <meta name="description" content="Bitcoin is up this week. Every week. Guaranteed.">
+<script>document.documentElement.className="js"</script>
 <link rel="canonical" href="https://bitcoinisup.com/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -57,6 +58,9 @@ a.sponsor-tile:hover { background: #ececec; }
 a.sponsor-tile:focus-visible, .sponsor-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 .sponsor-btn:hover { background: #2a2a2a; }
 .sponsor-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 28px; padding: 0 24px; background: var(--ink); color: #fff; border-radius: 8px; font: 500 16px/1 var(--body); text-decoration: none; }
+.js .sponsor-section { opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity .6s ease-out, transform .6s ease-out; }
+.js .sponsor-section.is-in { opacity: 1; visibility: visible; transform: none; }
+@media (prefers-reduced-motion: reduce) { .js .sponsor-section { opacity: 1; visibility: visible; transform: none; transition: none; } }
 @media (min-width: 900px) { .sponsor-grid { gap: 16px; } }
 @media (forced-colors: active) { .sponsor-tile { border: 1px solid CanvasText; } }
 </style>
@@ -91,6 +95,8 @@ a.sponsor-tile:focus-visible, .sponsor-btn:focus-visible { outline: 3px solid va
   var sec = document.getElementById('btc'); if (!sec) return;
   var line = document.getElementById('btc-line'), flip = document.getElementById('btc-flip'), note = document.getElementById('btc-note');
   var W = 600, H = 240, started = false;
+  function reveal() { document.getElementById('sponsors').classList.add('is-in'); }
+  setTimeout(reveal, 8000);
   function coingecko() {
     return fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7')
       .then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { return d.prices.map(function (p) { return p[1]; }); });
@@ -111,15 +117,16 @@ a.sponsor-tile:focus-visible, .sponsor-btn:focus-visible { outline: 3px solid va
     line.getBoundingClientRect();
     line.style.transition = 'stroke-dashoffset 1.6s ease-out, stroke .5s linear 1.1s';
     line.style.strokeDashoffset = 0;
-    if (!down) { line.classList.add('is-up'); line.style.transition = 'stroke-dashoffset 1.6s ease-out'; return; }
+    if (!down) { line.classList.add('is-up'); line.style.transition = 'stroke-dashoffset 1.6s ease-out'; setTimeout(reveal, 1600); return; }
     setTimeout(function () {
       flip.classList.add('is-flipped'); line.classList.add('is-up');
       note.textContent = 'It was down ' + pct + '%. We turned the chart upside down.';
+      setTimeout(reveal, 1400);
     }, 2100);
   }
   function start() {
     if (started) return; started = true;
-    coingecko().catch(coinbase).then(show).catch(function () { note.textContent = 'The price feed did not load. Refresh to try again.'; });
+    coingecko().catch(coinbase).then(show).catch(function () { note.textContent = 'The price feed did not load. Refresh to try again.'; reveal(); });
   }
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (e, o) { if (e[0].isIntersecting) { o.disconnect(); start(); } }, { threshold: 0.35 }).observe(sec);
