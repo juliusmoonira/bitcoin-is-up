@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bitcoin is up</title>
 <meta name="description" content="Bitcoin is up this week. Every week. Guaranteed.">
-<script>document.documentElement.className="js"</script>
+<script>document.documentElement.classList.add("js")</script>
 <link rel="canonical" href="https://bitcoinisup.com/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -92,21 +92,20 @@ a.sponsor-tile:focus-visible, .sponsor-btn:focus-visible { outline: 3px solid va
 <script>
 /* Bitcoin joke chart: last 7 days, hourly. Flips itself upside down when the week is red. */
 (function () {
-  var sec = document.getElementById('btc'); if (!sec) return;
+  var sec = document.getElementById('btc'), sponsors = document.getElementById('sponsors'), safety;
+  function reveal() { clearTimeout(safety); if (sponsors) sponsors.classList.add('is-in'); }
+  if (!sec) { reveal(); return; }
   var line = document.getElementById('btc-line'), flip = document.getElementById('btc-flip'), note = document.getElementById('btc-note');
   var W = 600, H = 240, started = false;
-  function reveal() { document.getElementById('sponsors').classList.add('is-in'); }
-  setTimeout(reveal, 8000);
   function coingecko() {
-    return fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7')
+    return fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7', { signal: AbortSignal.timeout(4000) })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { return d.prices.map(function (p) { return p[1]; }); });
   }
   function coinbase() {
-    return fetch('https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=3600')
+    return fetch('https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=3600', { signal: AbortSignal.timeout(4000) })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { return d.slice(0, 168).reverse().map(function (c) { return c[4]; }); });
   }
   function show(p) {
-    if (!p || p.length < 2) throw 0;
     var min = Math.min.apply(null, p), max = Math.max.apply(null, p), span = max - min || 1;
     line.setAttribute('d', p.map(function (v, i) { return (i ? 'L' : 'M') + (i / (p.length - 1) * W).toFixed(1) + ' ' + (8 + (1 - (v - min) / span) * (H - 16)).toFixed(1); }).join(' '));
     var first = p[0], last = p[p.length - 1], pct = Math.abs((last - first) / first * 100).toFixed(1), down = last < first;
@@ -121,15 +120,18 @@ a.sponsor-tile:focus-visible, .sponsor-btn:focus-visible { outline: 3px solid va
     setTimeout(function () {
       flip.classList.add('is-flipped'); line.classList.add('is-up');
       note.textContent = 'It was down ' + pct + '%. We turned the chart upside down.';
-      setTimeout(reveal, 1400);
+      setTimeout(reveal, 1600);
     }, 2100);
   }
   function start() {
     if (started) return; started = true;
-    coingecko().catch(coinbase).then(show).catch(function () { note.textContent = 'The price feed did not load. Refresh to try again.'; reveal(); });
+    safety = setTimeout(reveal, 10000);
+    coingecko().catch(coinbase).then(function (p) { if (!p || p.length < 2) throw 0; return p; })
+      .then(show, function () { note.textContent = 'The price feed did not load. Refresh to try again.'; reveal(); });
   }
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (e, o) { if (e[0].isIntersecting) { o.disconnect(); start(); } }, { threshold: 0.35 }).observe(sec);
+    new IntersectionObserver(function (e, o) { if (e[0].isIntersecting) { o.disconnect(); start(); } }, { threshold: 0.35 }).observe(flip);
+    if (sponsors) new IntersectionObserver(function (e, o) { if (e[0].isIntersecting) { o.disconnect(); if (!started) reveal(); } }).observe(sponsors);
   } else start();
 })();
 </script>
